@@ -32,14 +32,6 @@ This repository features a Next-Generation Web3 Platform offering a comprehensiv
 
 ---
 
-## Metrics
-
-- **Total Value Locked:** $2.4M (+12.5%)
-- **Active Campaigns:** 127 (+8.2%)
-- **DAO Members:** 3,421 (+15.7%)
-- **Proposals Passed:** 89 (+5.3%)
-
----
 
 ## Deployment
 
