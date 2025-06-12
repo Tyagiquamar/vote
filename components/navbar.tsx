@@ -22,7 +22,9 @@ interface NavbarProps {
   isConnected: boolean
   walletAddress: string
   isDemoMode: boolean
+  hasMetaMask: boolean
   onConnectWallet: () => void
+  onConnectDemoWallet: () => void
   onDisconnectWallet: () => void
   onToggleDemoMode: (enabled: boolean) => void
 }
@@ -31,7 +33,9 @@ export function Navbar({
   isConnected,
   walletAddress,
   isDemoMode,
+  hasMetaMask,
   onConnectWallet,
+  onConnectDemoWallet,
   onDisconnectWallet,
   onToggleDemoMode,
 }: NavbarProps) {
@@ -145,26 +149,46 @@ export function Navbar({
 
               {/* Wallet Connection */}
               {!isConnected ? (
-                <Button
-                  onClick={onConnectWallet}
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
-                >
-                  <Wallet className="mr-2 h-4 w-4" />
-                  {isDemoMode ? "Demo Wallet" : "Connect Wallet"}
-                </Button>
+                <div className="flex items-center gap-2">
+                  {hasMetaMask && !isDemoMode && (
+                    <Button
+                      onClick={onConnectWallet}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700"
+                    >
+                      <Wallet className="mr-2 h-4 w-4" />
+                      MetaMask
+                    </Button>
+                  )}
+                  <Button
+                    onClick={onConnectDemoWallet}
+                    variant={hasMetaMask && !isDemoMode ? "outline" : "default"}
+                    className={
+                      !hasMetaMask || isDemoMode
+                        ? "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70"
+                        : ""
+                    }
+                  >
+                    <TestTube className="mr-2 h-4 w-4" />
+                    Demo Wallet
+                  </Button>
+                </div>
               ) : (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                       {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                      {isDemoMode && (
+                        <Badge variant="secondary" className="text-xs">
+                          DEMO
+                        </Badge>
+                      )}
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel className="flex items-center gap-2">
                       <User className="h-4 w-4" />
-                      Wallet Connected
-                      {isDemoMode && <Badge variant="secondary">DEMO</Badge>}
+                      {isDemoMode ? "Demo Wallet" : "MetaMask Wallet"}
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem className="flex items-center gap-2">
@@ -250,16 +274,31 @@ export function Navbar({
 
                   {/* Wallet Connection */}
                   {!isConnected ? (
-                    <Button
-                      onClick={() => {
-                        onConnectWallet()
-                        setIsOpen(false)
-                      }}
-                      className="w-full bg-gradient-to-r from-primary to-primary/80"
-                    >
-                      <Wallet className="mr-2 h-4 w-4" />
-                      {isDemoMode ? "Demo Wallet" : "Connect Wallet"}
-                    </Button>
+                    <div className="space-y-2">
+                      {hasMetaMask && !isDemoMode && (
+                        <Button
+                          onClick={() => {
+                            onConnectWallet()
+                            setIsOpen(false)
+                          }}
+                          className="w-full bg-gradient-to-r from-orange-500 to-orange-600"
+                        >
+                          <Wallet className="mr-2 h-4 w-4" />
+                          Connect MetaMask
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() => {
+                          onConnectDemoWallet()
+                          setIsOpen(false)
+                        }}
+                        variant={hasMetaMask && !isDemoMode ? "outline" : "default"}
+                        className={`w-full ${!hasMetaMask || isDemoMode ? "bg-gradient-to-r from-primary to-primary/80" : ""}`}
+                      >
+                        <TestTube className="mr-2 h-4 w-4" />
+                        Demo Wallet
+                      </Button>
+                    </div>
                   ) : (
                     <div className="space-y-2">
                       <div className="flex items-center gap-2 px-3 py-2 bg-muted rounded-lg">

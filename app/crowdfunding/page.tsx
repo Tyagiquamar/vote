@@ -30,6 +30,7 @@ import {
   Shield,
   CheckCircle,
   Award,
+  TestTube,
 } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
 import { useWallet } from "../clientLayout"
@@ -81,7 +82,7 @@ const itemVariants = {
 }
 
 export default function CrowdfundingPage() {
-  const { isConnected, walletAddress, ethBalance, connectWallet } = useWallet()
+  const { isConnected, walletAddress, ethBalance, hasMetaMask, connectWallet, connectDemoWallet } = useWallet()
   const [campaigns, setCampaigns] = useState<Campaign[]>([])
   const [contributions, setContributions] = useState<Contribution[]>([])
   const [newCampaign, setNewCampaign] = useState({
@@ -508,25 +509,43 @@ export default function CrowdfundingPage() {
                 <p className="text-muted-foreground text-lg mb-8 max-w-md mx-auto">
                   Connect your wallet to create campaigns, contribute to projects, and track your investments
                 </p>
-                <Button
-                  onClick={connectWallet}
-                  size="lg"
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-lg px-8 py-6"
-                >
-                  {isLoading ? (
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-                      className="mr-2"
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  {hasMetaMask && (
+                    <Button
+                      onClick={connectWallet}
+                      size="lg"
+                      disabled={isLoading}
+                      className="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-lg px-8 py-6"
                     >
-                      <Zap className="h-5 w-5" />
-                    </motion.div>
-                  ) : (
-                    <Wallet className="mr-2 h-5 w-5" />
+                      {isLoading ? (
+                        <motion.div
+                          animate={{ rotate: 360 }}
+                          transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+                          className="mr-2"
+                        >
+                          <Zap className="h-5 w-5" />
+                        </motion.div>
+                      ) : (
+                        <Wallet className="mr-2 h-5 w-5" />
+                      )}
+                      {isLoading ? "Connecting..." : "Connect MetaMask"}
+                    </Button>
                   )}
-                  {isLoading ? "Connecting..." : "Connect Wallet"}
-                </Button>
+                  <Button
+                    onClick={connectDemoWallet}
+                    size="lg"
+                    variant={hasMetaMask ? "outline" : "default"}
+                    className={`text-lg px-8 py-6 ${!hasMetaMask ? "bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70" : ""}`}
+                  >
+                    <TestTube className="mr-2 h-5 w-5" />
+                    Try Demo Wallet
+                  </Button>
+                </div>
+                {!hasMetaMask && (
+                  <p className="text-sm text-muted-foreground mt-4">
+                    MetaMask not detected. You can still try the demo version!
+                  </p>
+                )}
               </CardContent>
             </Card>
           </motion.div>

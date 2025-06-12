@@ -18,7 +18,9 @@ interface WalletContextType {
   isDemoMode: boolean
   ethBalance: number
   tokenBalance: number
+  hasMetaMask: boolean
   connectWallet: () => Promise<void>
+  connectDemoWallet: () => void
   disconnectWallet: () => void
   toggleDemoMode: (enabled: boolean) => void
 }
@@ -40,76 +42,110 @@ export default function ClientLayout({
 }) {
   const [isConnected, setIsConnected] = useState(false)
   const [walletAddress, setWalletAddress] = useState("")
-  const [isDemoMode, setIsDemoMode] = useState(true)
+  const [isDemoMode, setIsDemoMode] = useState(false)
   const [ethBalance, setEthBalance] = useState(0)
   const [tokenBalance, setTokenBalance] = useState(0)
+  const [hasMetaMask, setHasMetaMask] = useState(false)
   const { toast } = useToast()
 
-  // Load saved state from localStorage
+  // Check for MetaMask availability and load saved state
   useEffect(() => {
+    // Check if MetaMask is available
+    const checkMetaMask = () => {
+      if (typeof window !== "undefined") {
+        const hasMetaMaskInstalled = typeof window.ethereum !== "undefined" && window.ethereum.isMetaMask
+        setHasMetaMask(hasMetaMaskInstalled)
+
+        if (!hasMetaMaskInstalled) {
+          // If no MetaMask, default to demo mode
+          setIsDemoMode(true)
+        }
+      }
+    }
+
+    checkMetaMask()
+
+    // Load saved state from localStorage
     const savedDemoMode = localStorage.getItem("demoMode")
     const savedConnection = localStorage.getItem("walletConnected")
     const savedAddress = localStorage.getItem("walletAddress")
+    const savedWalletType = localStorage.getItem("walletType")
 
     if (savedDemoMode !== null) {
       setIsDemoMode(JSON.parse(savedDemoMode))
     }
+
     if (savedConnection === "true" && savedAddress) {
       setIsConnected(true)
       setWalletAddress(savedAddress)
       setEthBalance(5.75)
       setTokenBalance(15000)
+
+      // Set demo mode based on saved wallet type
+      if (savedWalletType === "demo") {
+        setIsDemoMode(true)
+      }
     }
   }, [])
 
   const connectWallet = async () => {
+    if (!hasMetaMask) {
+      toast({
+        title: "MetaMask Not Found",
+        description: "Please install MetaMask or use demo mode to continue",
+        variant: "destructive",
+      })
+      return
+    }
+
     try {
-      if (isDemoMode) {
-        // Demo mode connection
-        const demoAddress = "0x1234567890123456789012345678901234567890"
+      // Real MetaMask wallet connection
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      })
+
+      if (accounts.length > 0) {
         setIsConnected(true)
-        setWalletAddress(demoAddress)
+        setWalletAddress(accounts[0])
         setEthBalance(5.75)
         setTokenBalance(15000)
+        setIsDemoMode(false)
         localStorage.setItem("walletConnected", "true")
-        localStorage.setItem("walletAddress", demoAddress)
+        localStorage.setItem("walletAddress", accounts[0])
+        localStorage.setItem("walletType", "metamask")
+        localStorage.setItem("demoMode", "false")
+
         toast({
-          title: "Demo Wallet Connected",
-          description: "You're now using demo mode with mock data",
+          title: "MetaMask Connected",
+          description: "Successfully connected to your MetaMask wallet",
         })
-      } else {
-        // Real wallet connection
-        if (typeof window !== "undefined" && window.ethereum) {
-          const accounts = await window.ethereum.request({
-            method: "eth_requestAccounts",
-          })
-          if (accounts.length > 0) {
-            setIsConnected(true)
-            setWalletAddress(accounts[0])
-            setEthBalance(5.75)
-            setTokenBalance(15000)
-            localStorage.setItem("walletConnected", "true")
-            localStorage.setItem("walletAddress", accounts[0])
-            toast({
-              title: "Wallet Connected",
-              description: "Successfully connected to your wallet",
-            })
-          }
-        } else {
-          toast({
-            title: "Wallet Not Found",
-            description: "Please install MetaMask or another Web3 wallet",
-            variant: "destructive",
-          })
-        }
       }
     } catch (error) {
       toast({
         title: "Connection Failed",
-        description: "Failed to connect wallet. Please try again.",
+        description: "Failed to connect to MetaMask. Please try again.",
         variant: "destructive",
       })
     }
+  }
+
+  const connectDemoWallet = () => {
+    // Demo wallet connection
+    const demoAddress = "0x1234567890123456789012345678901234567890"
+    setIsConnected(true)
+    setWalletAddress(demoAddress)
+    setEthBalance(5.75)
+    setTokenBalance(15000)
+    setIsDemoMode(true)
+    localStorage.setItem("walletConnected", "true")
+    localStorage.setItem("walletAddress", demoAddress)
+    localStorage.setItem("walletType", "demo")
+    localStorage.setItem("demoMode", "true")
+
+    toast({
+      title: "Demo Wallet Connected",
+      description: "You're now using demo mode with mock data",
+    })
   }
 
   const disconnectWallet = () => {
@@ -119,6 +155,8 @@ export default function ClientLayout({
     setTokenBalance(0)
     localStorage.removeItem("walletConnected")
     localStorage.removeItem("walletAddress")
+    localStorage.removeItem("walletType")
+
     toast({
       title: "Wallet Disconnected",
       description: "Your wallet has been disconnected",
@@ -136,7 +174,11 @@ export default function ClientLayout({
 
     toast({
       title: enabled ? "Demo Mode Enabled" : "Demo Mode Disabled",
-      description: enabled ? "You're now using demo mode with mock data" : "You can now connect to real wallets",
+      description: enabled
+        ? "You can now use demo wallet without MetaMask"
+        : hasMetaMask
+          ? "You can now connect to MetaMask"
+          : "MetaMask is required for real wallet connection",
     })
   }
 
@@ -146,7 +188,9 @@ export default function ClientLayout({
     isDemoMode,
     ethBalance,
     tokenBalance,
+    hasMetaMask,
     connectWallet,
+    connectDemoWallet,
     disconnectWallet,
     toggleDemoMode,
   }
@@ -161,7 +205,9 @@ export default function ClientLayout({
                 isConnected={isConnected}
                 walletAddress={walletAddress}
                 isDemoMode={isDemoMode}
+                hasMetaMask={hasMetaMask}
                 onConnectWallet={connectWallet}
+                onConnectDemoWallet={connectDemoWallet}
                 onDisconnectWallet={disconnectWallet}
                 onToggleDemoMode={toggleDemoMode}
               />
