@@ -68,18 +68,22 @@ Access the live application here:
 
 1. **Clone the Repository**
 
+
    ```bash
+
    git clone https://github.com/mohdquamartyagi-7279s-projects/decentralized-application-development.git
    cd decentralized-application-development
-````
+   ```
+  
 
 2. **Install Dependencies**
 
    Use npm or yarn to install the necessary packages:
-
    ```bash
    npm install   # OR yarn install
+  
    ```
+   
 
 3. **Configure Environment Variables**
 
@@ -126,8 +130,6 @@ Contributions to this project are welcome! Feel free to open issues or submit pu
 \[MIT]
 
 ---
-
-## Contact
 
 
 ```
