@@ -268,7 +268,7 @@ export default function HomePage() {
                 <CardContent className="space-y-6">
                   <p className="text-muted-foreground text-lg leading-relaxed">
                     Launch and support fundraising campaigns with smart contract-based escrow, automatic fund release,
-                    and comprehensive contributor protection mechanisms.
+                    and comprehensive contributor protection mechanisms successfully.
                   </p>
 
                   <div className="grid grid-cols-2 gap-4">
